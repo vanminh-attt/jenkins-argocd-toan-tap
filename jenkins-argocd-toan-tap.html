@@ -1,0 +1,518 @@
+<meta charset="utf-8">
+<title>Jenkins & Argo CD — Toàn tập cho DevSecOps</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --ink: #1a1d24;
+    --muted: #5b6470;
+    --line: #e3e6ea;
+    --brand: #2b6cb0;
+    --brand-soft: #ebf4ff;
+    --jenkins: #d33833;
+    --argo: #ef7b4d;
+    --ok: #2f855a;
+    --ok-soft: #f0fff4;
+    --warn: #c05621;
+    --warn-soft: #fffaf0;
+    --danger: #c53030;
+    --danger-soft: #fff5f5;
+    --code-bg: #1b1f27;
+    --code-ink: #e6edf3;
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1116;
+      --card: #161b22;
+      --ink: #e6edf3;
+      --muted: #9aa4b2;
+      --line: #262c36;
+      --brand: #6cb2ff;
+      --brand-soft: #12233b;
+      --ok: #6ee7a0;
+      --ok-soft: #0f2a1c;
+      --warn: #f0b37e;
+      --warn-soft: #2b2213;
+      --danger: #ff9b9b;
+      --danger-soft: #2b1616;
+      --code-bg: #0a0d12;
+      --code-ink: #e6edf3;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.65;
+    font-size: 16px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 32px 20px 80px; }
+  header.hero {
+    background: linear-gradient(135deg, var(--jenkins), var(--argo));
+    color: #fff; border-radius: var(--radius); padding: 34px 30px; margin-bottom: 28px;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 28px; line-height: 1.25; }
+  header.hero p { margin: 0; opacity: .95; font-size: 15px; }
+  .badges { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge { background: rgba(255,255,255,.2); padding: 4px 12px; border-radius: 20px; font-size: 12.5px; font-weight: 600; }
+
+  nav.toc {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px 22px; margin-bottom: 28px;
+  }
+  nav.toc h2 { margin: 0 0 10px; font-size: 15px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+  nav.toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 30px; }
+  nav.toc a { color: var(--brand); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  section { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 28px; margin-bottom: 22px; }
+  h2.sec { margin: 0 0 4px; font-size: 22px; display: flex; align-items: center; gap: 10px; }
+  h2.sec .n { background: var(--brand-soft); color: var(--brand); width: 30px; height: 30px; border-radius: 8px; display: inline-grid; place-items: center; font-size: 15px; font-weight: 700; }
+  h3 { font-size: 17.5px; margin: 24px 0 8px; }
+  h4 { font-size: 15px; margin: 18px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0; padding-left: 22px; }
+  li { margin: 5px 0; }
+  code { background: var(--brand-soft); color: var(--brand); padding: 1px 6px; border-radius: 5px; font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 13.5px; }
+  pre {
+    background: var(--code-bg); color: var(--code-ink); padding: 16px 18px; border-radius: 10px;
+    overflow-x: auto; font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size: 13px; line-height: 1.55; margin: 12px 0;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+  .cmt { color: #7d8590; }
+  .kw { color: #ff7b72; }
+  .str { color: #a5d6ff; }
+
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14.5px; }
+  th, td { border: 1px solid var(--line); padding: 9px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--brand-soft); color: var(--ink); font-weight: 700; }
+
+  .box { border-left: 4px solid var(--brand); background: var(--brand-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; }
+  .box.ok { border-color: var(--ok); background: var(--ok-soft); }
+  .box.warn { border-color: var(--warn); background: var(--warn-soft); }
+  .box.danger { border-color: var(--danger); background: var(--danger-soft); }
+  .box .t { font-weight: 700; display: block; margin-bottom: 3px; }
+
+  .diagram { background: var(--code-bg); color: var(--code-ink); border-radius: 10px; padding: 18px; overflow-x: auto; font-family: "SFMono-Regular", Consolas, monospace; font-size: 12.5px; line-height: 1.5; white-space: pre; }
+
+  .pill { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 20px; }
+  .pill.j { background: var(--jenkins); color: #fff; }
+  .pill.a { background: var(--argo); color: #fff; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } nav.toc ol { columns: 1; } }
+  .mini { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .mini h4 { margin-top: 0; }
+
+  footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 30px; }
+  .q { font-weight: 600; margin-top: 14px; }
+  .a-txt { color: var(--muted); }
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <h1>Jenkins &amp; Argo CD — Toàn tập</h1>
+  <p>Công cụ · Cách chạy · Cách hoạt động bên trong · Kết hợp CI/CD · Góc nhìn DevSecOps</p>
+  <div class="badges">
+    <span class="badge">🔧 Jenkins = CI (Build/Test)</span>
+    <span class="badge">🚀 Argo CD = CD (Deploy/GitOps)</span>
+    <span class="badge">🇻🇳 Tiếng Việt</span>
+    <span class="badge">Cập nhật 07/2026</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <h2>Mục lục</h2>
+  <ol>
+    <li><a href="#big">Bức tranh CI/CD tổng thể</a></li>
+    <li><a href="#jenkins">Jenkins là gì &amp; kiến trúc</a></li>
+    <li><a href="#jenkins-run">Cách chạy Jenkins</a></li>
+    <li><a href="#jenkins-how">Jenkins hoạt động thế nào</a></li>
+    <li><a href="#jenkinsfile">Jenkinsfile &amp; Pipeline</a></li>
+    <li><a href="#argo">Argo CD &amp; GitOps là gì</a></li>
+    <li><a href="#argo-run">Cách chạy Argo CD</a></li>
+    <li><a href="#argo-how">Argo CD hoạt động thế nào</a></li>
+    <li><a href="#combine">Kết hợp Jenkins + Argo CD</a></li>
+    <li><a href="#secops">Góc nhìn DevSecOps</a></li>
+    <li><a href="#compare">So sánh nhanh</a></li>
+    <li><a href="#glossary">Thuật ngữ &amp; câu hỏi phỏng vấn</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="big">
+  <h2 class="sec"><span class="n">1</span> Bức tranh CI/CD tổng thể</h2>
+  <p><strong>CI/CD</strong> là "dây chuyền tự động" đưa code từ máy lập trình viên ra tới môi trường chạy thật. Chia làm hai nửa:</p>
+  <ul>
+    <li><strong>CI — Continuous Integration (Tích hợp liên tục):</strong> mỗi lần push code → tự động <em>build, test, quét bảo mật, đóng gói</em>. Đây là sân của <span class="pill j">Jenkins</span>.</li>
+    <li><strong>CD — Continuous Delivery/Deployment (Giao/triển khai liên tục):</strong> lấy sản phẩm đã đóng gói → <em>đưa lên môi trường chạy</em> (K8s, server...). Đây là sân của <span class="pill a">Argo CD</span>.</li>
+  </ul>
+
+  <div class="diagram">Lập trình viên
+   │  git push
+   ▼
+┌──────────────────────────────┐      ┌──────────────────────────────┐
+│   CI  —  JENKINS             │      │   CD  —  ARGO CD             │
+│                              │      │                              │
+│  1. Lấy code (git)           │      │  5. Theo dõi Git repo cấu hình│
+│  2. Build (mvn/npm/docker)   │      │  6. So sánh mong muốn vs thực │
+│  3. Test + quét bảo mật      │─────►│  7. Đồng bộ (sync) vào K8s   │
+│  4. Push image → Registry    │ đẩy  │  8. Tự sửa nếu bị lệch (drift)│
+│     & cập nhật manifest Git  │image │                              │
+└──────────────────────────────┘      └──────────────────────────────┘
+        (làm ra "cái gì")                    (đưa "cái đó" đi đâu, chạy sao)</div>
+
+  <div class="box"><span class="t">Ý chính cần nhớ</span>
+  Jenkins trả lời câu hỏi <em>"code này có build/test được không, đóng gói thành gì?"</em> — Argo CD trả lời câu hỏi <em>"trạng thái mong muốn trong Git đã khớp với những gì đang chạy trên cluster chưa?"</em>. Hai công cụ bổ sung nhau, không thay thế nhau.</div>
+</section>
+
+<!-- 2 -->
+<section id="jenkins">
+  <h2 class="sec"><span class="n">2</span> Jenkins là gì &amp; kiến trúc</h2>
+  <p><strong>Jenkins</strong> là máy chủ tự động hóa (automation server) mã nguồn mở, viết bằng Java, ra đời từ 2011 (tách từ Hudson). Nó là "công cụ CI kinh điển" — cực kỳ linh hoạt nhờ hệ sinh thái <strong>1.800+ plugin</strong>, chạy được gần như mọi việc: build, test, deploy, cron job...</p>
+
+  <h3>Kiến trúc Controller – Agent</h3>
+  <div class="diagram">                 ┌───────────────────────────┐
+                 │   JENKINS CONTROLLER      │   (trước gọi là "master")
+   Web UI  ◄────►│   - Giao diện web + API   │
+   Git hook ────►│   - Lập lịch job          │
+                 │   - Quản lý plugin, cấu hình│
+                 │   - Lưu kết quả build     │
+                 └───────────┬───────────────┘
+                             │ giao việc (SSH / JNLP / inbound)
+              ┌──────────────┼──────────────┐
+              ▼              ▼              ▼
+        ┌──────────┐  ┌──────────┐  ┌──────────┐
+        │ Agent 1  │  │ Agent 2  │  │ Agent 3  │   (node/worker thực thi)
+        │ Linux    │  │ Windows  │  │ Docker   │
+        └──────────┘  └──────────┘  └──────────┘</div>
+
+  <table>
+    <tr><th>Thành phần</th><th>Vai trò</th></tr>
+    <tr><td><strong>Controller</strong></td><td>"Bộ não": chạy giao diện web, lập lịch, phân phối công việc, lưu cấu hình &amp; lịch sử build. <em>Không nên</em> để controller tự build (rủi ro bảo mật + quá tải).</td></tr>
+    <tr><td><strong>Agent (Node)</strong></td><td>"Tay chân": nơi thực sự chạy các bước build/test. Có thể là máy Linux/Windows/Mac, container Docker, hoặc pod Kubernetes sinh ra theo yêu cầu rồi tự hủy.</td></tr>
+    <tr><td><strong>Executor</strong></td><td>Một "khe" chạy job trên agent. 1 agent có N executor = chạy song song N job.</td></tr>
+    <tr><td><strong>Job / Pipeline</strong></td><td>Định nghĩa công việc cần làm. Hiện đại nhất là <em>Pipeline</em> viết bằng file <code>Jenkinsfile</code>.</td></tr>
+    <tr><td><strong>Plugin</strong></td><td>Mở rộng chức năng: Git, Docker, Kubernetes, Slack, SonarQube, Trivy... Đây là sức mạnh &amp; cũng là điểm yếu bảo mật của Jenkins.</td></tr>
+  </table>
+</section>
+
+<!-- 3 -->
+<section id="jenkins-run">
+  <h2 class="sec"><span class="n">3</span> Cách chạy Jenkins</h2>
+
+  <h4>Cách nhanh nhất — Docker (khuyên dùng để học)</h4>
+  <pre><code><span class="cmt"># 1. Tạo volume để GIỮ dữ liệu (không mất khi tắt container — khác với --rm bạn từng dùng!)</span>
+docker volume create jenkins_home
+
+<span class="cmt"># 2. Chạy Jenkins LTS</span>
+docker run -d --name jenkins \
+  -p 8080:8080 \                        <span class="cmt"># cổng Web UI</span>
+  -p 50000:50000 \                      <span class="cmt"># cổng để agent kết nối vào</span>
+  -v jenkins_home:/var/jenkins_home \   <span class="cmt"># gắn volume lưu cấu hình + job</span>
+  jenkins/jenkins:lts
+
+<span class="cmt"># 3. Lấy mật khẩu admin ban đầu</span>
+docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword</code></pre>
+
+  <p>Mở trình duyệt vào <code>http://localhost:8080</code> → dán mật khẩu → cài "Suggested plugins" → tạo tài khoản admin. Xong.</p>
+
+  <div class="box warn"><span class="t">⚠️ So với lệnh EJBCA trước đây của bạn</span>
+  Lệnh EJBCA bạn dùng có <code>--rm</code> nên tắt là mất sạch. Với Jenkins <strong>tuyệt đối nên dùng <code>-v jenkins_home:...</code></strong> và <strong>bỏ <code>--rm</code></strong>, nếu không mọi job và cấu hình sẽ bay hết mỗi lần restart.</div>
+
+  <h4>Các cách cài khác</h4>
+  <table>
+    <tr><th>Cách</th><th>Khi nào dùng</th></tr>
+    <tr><td><strong>Docker</strong></td><td>Học tập, dev, demo. Nhanh, gọn, dễ xóa làm lại.</td></tr>
+    <tr><td><strong>Cài trực tiếp</strong> (apt/yum/war)</td><td>Server truyền thống. <code>java -jar jenkins.war</code> hoặc gói hệ điều hành.</td></tr>
+    <tr><td><strong>Helm trên Kubernetes</strong></td><td>Production. Agent là pod sinh động, tự co giãn. <code>helm install jenkins jenkins/jenkins</code></td></tr>
+  </table>
+</section>
+
+<!-- 4 -->
+<section id="jenkins-how">
+  <h2 class="sec"><span class="n">4</span> Jenkins hoạt động thế nào (vòng đời một build)</h2>
+  <ol>
+    <li><strong>Kích hoạt (Trigger):</strong> có gì đó khởi động job — push code lên Git (webhook), theo lịch (cron), thủ công, hoặc job khác gọi tới.</li>
+    <li><strong>Cấp agent:</strong> controller tìm một agent rảnh (hoặc tạo pod/container mới) để chạy.</li>
+    <li><strong>Checkout:</strong> agent tải code từ Git về workspace.</li>
+    <li><strong>Chạy các stage:</strong> lần lượt Build → Test → Scan → Package theo đúng file <code>Jenkinsfile</code>.</li>
+    <li><strong>Artifact &amp; báo cáo:</strong> lưu sản phẩm (image, .jar...), báo cáo test, gửi thông báo (Slack/email).</li>
+    <li><strong>Dọn dẹp:</strong> giải phóng agent; nếu là pod thì hủy luôn.</li>
+  </ol>
+
+  <div class="box"><span class="t">Webhook vs Polling</span>
+  <strong>Webhook</strong> (khuyên dùng): GitHub/GitLab "gõ cửa" báo Jenkins ngay khi có push → phản ứng tức thì. <strong>Polling</strong>: Jenkins tự hỏi Git định kỳ ("có gì mới không?") → tốn tài nguyên, chậm hơn.</div>
+</section>
+
+<!-- 5 -->
+<section id="jenkinsfile">
+  <h2 class="sec"><span class="n">5</span> Jenkinsfile &amp; Pipeline</h2>
+  <p>Thực hành hiện đại là <strong>"Pipeline as Code"</strong>: mô tả toàn bộ quy trình trong một file <code>Jenkinsfile</code> đặt ngay trong repo (versioned cùng code). Có 2 cú pháp: <em>Declarative</em> (dễ đọc, khuyên dùng) và <em>Scripted</em> (linh hoạt hơn, dùng Groovy thuần).</p>
+
+  <h4>Ví dụ Jenkinsfile Declarative — pipeline CI cho app Docker</h4>
+  <pre><code><span class="kw">pipeline</span> {
+  agent any                          <span class="cmt">// chạy trên agent bất kỳ</span>
+
+  environment {
+    IMAGE = <span class="str">"registry.example.com/myapp"</span>
+    TAG   = <span class="str">"${env.BUILD_NUMBER}"</span>   <span class="cmt">// tag theo số build</span>
+  }
+
+  stages {
+    stage(<span class="str">'Checkout'</span>) {
+      steps { checkout scm }         <span class="cmt">// lấy code</span>
+    }
+
+    stage(<span class="str">'Build'</span>) {
+      steps { sh <span class="str">'mvn -B clean package'</span> }
+    }
+
+    stage(<span class="str">'Unit Test'</span>) {
+      steps { sh <span class="str">'mvn test'</span> }
+      post { always { junit <span class="str">'target/surefire-reports/*.xml'</span> } }
+    }
+
+    stage(<span class="str">'Security Scan (SAST)'</span>) {   <span class="cmt">// góc DevSecOps</span>
+      steps { sh <span class="str">'trivy fs --exit-code 1 --severity HIGH,CRITICAL .'</span> }
+    }
+
+    stage(<span class="str">'Build & Push Image'</span>) {
+      steps {
+        sh <span class="str">"docker build -t ${IMAGE}:${TAG} ."</span>
+        sh <span class="str">"docker push ${IMAGE}:${TAG}"</span>
+      }
+    }
+
+    stage(<span class="str">'Update GitOps repo'</span>) {   <span class="cmt">// bàn giao cho Argo CD!</span>
+      steps {
+        sh <span class="str">"""
+          git clone https://git/example/k8s-manifests.git
+          cd k8s-manifests
+          sed -i 's|image:.*|image: ${IMAGE}:${TAG}|' deployment.yaml
+          git commit -am 'Deploy ${TAG}' && git push
+        """</span>
+      }
+    }
+  }
+
+  post {
+    failure { echo <span class="str">'Build hỏng — gửi cảnh báo Slack'</span> }
+  }
+}</code></pre>
+
+  <div class="box ok"><span class="t">✅ Chú ý stage cuối</span>
+  Jenkins <strong>không</strong> tự deploy lên K8s. Nó chỉ <em>cập nhật số phiên bản image vào Git repo chứa manifest</em>. Việc deploy để Argo CD lo — đây chính là điểm nối giữa hai công cụ (xem mục 9).</div>
+</section>
+
+<!-- 6 -->
+<section id="argo">
+  <h2 class="sec"><span class="n">6</span> Argo CD &amp; GitOps là gì</h2>
+  <p><strong>Argo CD</strong> là công cụ <strong>Continuous Delivery theo mô hình GitOps</strong>, chạy <em>bên trong Kubernetes</em>. Nó thuộc dự án Argo của CNCF.</p>
+
+  <h3>GitOps — tư tưởng cốt lõi</h3>
+  <p>GitOps quy định: <strong>Git là nguồn chân lý duy nhất (single source of truth)</strong> cho trạng thái hệ thống. Bạn không "gõ lệnh deploy" nữa — bạn <em>sửa file trong Git</em>, và một tác nhân (Argo CD) sẽ tự động làm cho cluster khớp với Git.</p>
+  <ul>
+    <li><strong>Declarative:</strong> mô tả "trạng thái mong muốn" (YAML), không mô tả "các bước làm".</li>
+    <li><strong>Versioned trong Git:</strong> mọi thay đổi đều có lịch sử, review qua Pull Request, rollback = git revert.</li>
+    <li><strong>Tự động đồng bộ (Pull-based):</strong> Argo CD nằm trong cluster, chủ động <em>kéo</em> cấu hình từ Git về (khác Jenkins đẩy vào — xem box dưới).</li>
+    <li><strong>Tự chữa lành (Self-healing):</strong> ai đó lỡ sửa tay trên cluster → Argo CD phát hiện "lệch" (drift) và kéo về đúng như Git.</li>
+  </ul>
+
+  <div class="box"><span class="t">Push vs Pull — vì sao GitOps an toàn hơn</span>
+  Kiểu <strong>Push</strong> cổ điển (Jenkins tự <code>kubectl apply</code>): CI cần giữ credential quyền cao vào cluster → nếu Jenkins bị hack, cluster bị hack. Kiểu <strong>Pull</strong> của Argo CD: agent nằm sẵn trong cluster tự kéo cấu hình ra → <em>không cần lộ credential cluster ra ngoài</em>, an toàn hơn nhiều.</div>
+</section>
+
+<!-- 7 -->
+<section id="argo-run">
+  <h2 class="sec"><span class="n">7</span> Cách chạy Argo CD</h2>
+  <p>Argo CD <strong>cần một cluster Kubernetes</strong>. Để học, dùng <code>minikube</code>, <code>kind</code> hoặc Docker Desktop bật Kubernetes.</p>
+
+  <pre><code><span class="cmt"># 1. Tạo namespace và cài Argo CD</span>
+kubectl create namespace argocd
+kubectl apply -n argocd -f \
+  https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+<span class="cmt"># 2. Chờ các pod chạy xong</span>
+kubectl get pods -n argocd -w
+
+<span class="cmt"># 3. Mở giao diện web ra ngoài (port-forward tạm)</span>
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+
+<span class="cmt"># 4. Lấy mật khẩu admin ban đầu (user: admin)</span>
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d</code></pre>
+
+  <p>Truy cập <code>https://localhost:8080</code>. Có thể dùng cả <strong>Web UI</strong> lẫn <strong>CLI</strong>:</p>
+  <pre><code><span class="cmt"># Cài CLI rồi đăng nhập</span>
+argocd login localhost:8080
+argocd app list
+argocd app sync myapp</code></pre>
+</section>
+
+<!-- 8 -->
+<section id="argo-how">
+  <h2 class="sec"><span class="n">8</span> Argo CD hoạt động thế nào</h2>
+
+  <h3>Đối tượng trung tâm: Application</h3>
+  <p>Bạn khai báo một CRD <code>Application</code> nói cho Argo CD biết: <em>lấy manifest ở Git repo nào → triển khai vào cluster/namespace nào</em>.</p>
+
+  <pre><code><span class="kw">apiVersion:</span> argoproj.io/v1alpha1
+<span class="kw">kind:</span> Application
+<span class="kw">metadata:</span>
+  <span class="kw">name:</span> myapp
+  <span class="kw">namespace:</span> argocd
+<span class="kw">spec:</span>
+  <span class="kw">project:</span> default
+  <span class="kw">source:</span>                                <span class="cmt"># TRẠNG THÁI MONG MUỐN ở đâu</span>
+    <span class="kw">repoURL:</span> https://git/example/k8s-manifests.git
+    <span class="kw">targetRevision:</span> main
+    <span class="kw">path:</span> myapp                            <span class="cmt"># thư mục chứa YAML</span>
+  <span class="kw">destination:</span>                           <span class="cmt"># triển khai ĐI ĐÂU</span>
+    <span class="kw">server:</span> https://kubernetes.default.svc
+    <span class="kw">namespace:</span> production
+  <span class="kw">syncPolicy:</span>
+    <span class="kw">automated:</span>                           <span class="cmt"># tự động đồng bộ</span>
+      <span class="kw">prune:</span> true                         <span class="cmt"># xóa resource không còn trong Git</span>
+      <span class="kw">selfHeal:</span> true                      <span class="cmt"># tự sửa khi bị chỉnh tay (drift)</span></code></pre>
+
+  <h3>Vòng lặp đồng bộ (Reconciliation loop)</h3>
+  <div class="diagram">        ┌──────────────────────────────────────────────┐
+        │                 ARGO CD (trong cluster)        │
+        │                                                │
+  Git ──┤ 1. Đọc "trạng thái mong muốn" từ Git repo      │
+  repo  │ 2. Đọc "trạng thái thực tế" từ K8s API         │
+        │ 3. So sánh (diff)                              │
+        │       ├─ Synced   → không làm gì               │
+        │       └─ OutOfSync → 4. Áp dụng để khớp lại   │──► K8s
+        │ 5. Lặp lại liên tục (mặc định ~3 phút / webhook)│    cluster
+        └──────────────────────────────────────────────┘</div>
+
+  <table>
+    <tr><th>Trạng thái</th><th>Nghĩa là</th></tr>
+    <tr><td><strong>Synced</strong></td><td>Cluster khớp đúng với Git. ✅</td></tr>
+    <tr><td><strong>OutOfSync</strong></td><td>Git và cluster đang lệch nhau (có commit mới, hoặc ai đó sửa tay).</td></tr>
+    <tr><td><strong>Healthy / Degraded</strong></td><td>Sức khỏe thực tế của resource (pod chạy ổn hay đang lỗi).</td></tr>
+  </table>
+</section>
+
+<!-- 9 -->
+<section id="combine">
+  <h2 class="sec"><span class="n">9</span> Kết hợp Jenkins + Argo CD (mô hình thực tế)</h2>
+  <p>Đây là kiến trúc CI/CD phổ biến nhất hiện nay, dùng <strong>2 repo</strong>:</p>
+  <div class="diagram">┌── Repo APP (code) ──┐        ┌── Repo CONFIG (manifest K8s) ──┐
+│ src/, Dockerfile,   │        │ deployment.yaml, service.yaml  │
+│ Jenkinsfile         │        │ (image: myapp:123)             │
+└─────────┬───────────┘        └───────────┬────────────────────┘
+   push   │                                │ Argo CD theo dõi repo này
+          ▼                                ▼
+   ┌─────────────┐  build+test+scan  ┌──────────────┐  sync   ┌───────────┐
+   │  JENKINS    │──► push image ───►│   REGISTRY   │         │    K8S    │
+   │  (CI)       │                   └──────────────┘         │  CLUSTER  │
+   │             │── sửa tag image ─►  Repo CONFIG ──► ARGO CD ─► deploy ─►│
+   └─────────────┘   (git commit)                (CD, pull)    └───────────┘</div>
+
+  <ol>
+    <li>Dev push code → <strong>Jenkins</strong> build, test, quét bảo mật, đóng gói <strong>image</strong> và đẩy lên Registry.</li>
+    <li>Jenkins <strong>commit tag image mới</strong> vào repo config (manifest).</li>
+    <li><strong>Argo CD</strong> phát hiện repo config đổi → tự kéo về → deploy vào Kubernetes.</li>
+    <li>Muốn rollback? Chỉ cần <code>git revert</code> trên repo config — Argo CD tự đưa cluster về phiên bản cũ.</li>
+  </ol>
+  <div class="box ok"><span class="t">✅ Phân vai rõ ràng</span>
+  <strong>Jenkins làm "cái gì" (artifact)</strong>, <strong>Argo CD làm "trạng thái nào đang chạy"</strong>. Jenkins không cần quyền vào cluster → giảm rủi ro. Git là nhật ký deploy đầy đủ, có thể audit.</div>
+</section>
+
+<!-- 10 -->
+<section id="secops">
+  <h2 class="sec"><span class="n">10</span> Góc nhìn DevSecOps</h2>
+  <div class="grid2">
+    <div class="mini">
+      <h4>🔧 Bảo mật Jenkins</h4>
+      <ul>
+        <li>Đừng để controller tự chạy build; tách agent riêng.</li>
+        <li>Quản lý bí mật bằng <strong>Credentials Plugin</strong> / HashiCorp Vault — <em>không</em> hardcode trong Jenkinsfile.</li>
+        <li>Bật RBAC (Role-based Authorization), tắt đăng nhập ẩn danh.</li>
+        <li>Cập nhật plugin thường xuyên — plugin là bề mặt tấn công lớn nhất của Jenkins.</li>
+        <li>Nhúng bước quét: <strong>SAST</strong> (SonarQube), <strong>SCA</strong> (Trivy/Snyk), <strong>secret scan</strong> (gitleaks) ngay trong pipeline.</li>
+      </ul>
+    </div>
+    <div class="mini">
+      <h4>🚀 Bảo mật Argo CD</h4>
+      <ul>
+        <li>Mô hình <strong>pull</strong> → không lộ credential cluster ra CI. ✔</li>
+        <li>Bật <strong>SSO + RBAC</strong>, đổi mật khẩu admin mặc định ngay.</li>
+        <li>Dùng <strong>AppProject</strong> giới hạn repo/namespace/cluster mà mỗi team được deploy.</li>
+        <li><code>selfHeal: true</code> chống chỉnh sửa trái phép trực tiếp trên cluster.</li>
+        <li>Ký &amp; xác minh commit (GPG) để chống inject manifest độc hại vào Git.</li>
+        <li>Mọi thay đổi phải qua <strong>Pull Request review</strong> — Git trở thành chốt kiểm soát &amp; audit trail.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="box"><span class="t">Shift-Left</span>
+  Triết lý DevSecOps: đẩy kiểm tra bảo mật về sớm nhất có thể. Trong mô hình này, bảo mật được "nhúng" vào pipeline Jenkins (quét sớm) và vào quy trình review Git của Argo CD (kiểm soát trước khi deploy).</div>
+</section>
+
+<!-- 11 -->
+<section id="compare">
+  <h2 class="sec"><span class="n">11</span> So sánh nhanh Jenkins vs Argo CD</h2>
+  <table>
+    <tr><th>Tiêu chí</th><th><span class="pill j">Jenkins</span></th><th><span class="pill a">Argo CD</span></th></tr>
+    <tr><td>Vai trò chính</td><td>CI — Build, Test, đóng gói</td><td>CD — Deploy theo GitOps</td></tr>
+    <tr><td>Phạm vi</td><td>Đa năng (mọi automation)</td><td>Chuyên deploy vào Kubernetes</td></tr>
+    <tr><td>Mô hình</td><td>Push (chủ động đẩy)</td><td>Pull (kéo từ Git về)</td></tr>
+    <tr><td>Nơi chạy</td><td>Server / VM / container</td><td>Bên trong K8s cluster</td></tr>
+    <tr><td>Cấu hình</td><td>Jenkinsfile (Groovy)</td><td>YAML declarative (K8s CRD)</td></tr>
+    <tr><td>Nguồn chân lý</td><td>Không bắt buộc</td><td>Git (bắt buộc)</td></tr>
+    <tr><td>Rollback</td><td>Chạy lại job cũ</td><td><code>git revert</code> → tự đồng bộ</td></tr>
+    <tr><td>Tự chữa lành drift</td><td>Không</td><td>Có (self-heal)</td></tr>
+    <tr><td>Giao diện</td><td>Web UI + plugin</td><td>Web UI + CLI, có sơ đồ resource</td></tr>
+  </table>
+  <div class="box warn"><span class="t">Đừng hiểu nhầm</span>
+  Chúng <strong>không cạnh tranh</strong> nhau. Jenkins ≈ Argo Workflows/GitHub Actions (CI); Argo CD ≈ Flux CD (CD/GitOps). Bộ đôi Jenkins (CI) + Argo CD (CD) là kết hợp rất thường gặp.</div>
+</section>
+
+<!-- 12 -->
+<section id="glossary">
+  <h2 class="sec"><span class="n">12</span> Thuật ngữ &amp; câu hỏi phỏng vấn</h2>
+
+  <h4>Thuật ngữ nhanh</h4>
+  <table>
+    <tr><th>Thuật ngữ</th><th>Nghĩa</th></tr>
+    <tr><td>Pipeline</td><td>Chuỗi các bước tự động (build→test→deploy).</td></tr>
+    <tr><td>Artifact</td><td>Sản phẩm build ra (image, .jar, .zip...).</td></tr>
+    <tr><td>Registry</td><td>Kho lưu Docker image (Docker Hub, Harbor, ECR).</td></tr>
+    <tr><td>Manifest</td><td>File YAML mô tả resource Kubernetes.</td></tr>
+    <tr><td>Drift</td><td>Trạng thái thực tế lệch khỏi trạng thái khai báo trong Git.</td></tr>
+    <tr><td>Reconciliation</td><td>Vòng lặp so sánh &amp; kéo thực tế về đúng mong muốn.</td></tr>
+    <tr><td>Webhook</td><td>Git "gõ cửa" báo có thay đổi để kích hoạt tức thì.</td></tr>
+    <tr><td>SAST / SCA / DAST</td><td>Quét mã tĩnh / quét thư viện phụ thuộc / quét ứng dụng đang chạy.</td></tr>
+  </table>
+
+  <h4>Câu hỏi thường gặp khi phỏng vấn</h4>
+  <p class="q">Q: Jenkins và Argo CD khác nhau chỗ nào?</p>
+  <p class="a-txt">Jenkins là CI đa năng (build/test/đóng gói, mô hình push). Argo CD là CD chuyên GitOps cho K8s (mô hình pull, Git là nguồn chân lý). Thường dùng chung.</p>
+
+  <p class="q">Q: GitOps là gì và lợi ích?</p>
+  <p class="a-txt">Dùng Git làm nguồn chân lý duy nhất cho trạng thái hệ thống; deploy = sửa Git. Lợi ích: audit đầy đủ, rollback dễ (git revert), self-heal, không lộ credential cluster ra CI.</p>
+
+  <p class="q">Q: Vì sao mô hình pull (Argo CD) an toàn hơn push?</p>
+  <p class="a-txt">Vì agent nằm sẵn trong cluster tự kéo cấu hình, không phải đưa credential quyền cao của cluster ra hệ thống CI bên ngoài — giảm bề mặt tấn công.</p>
+
+  <p class="q">Q: Controller và Agent trong Jenkins?</p>
+  <p class="a-txt">Controller là bộ não (UI, lập lịch, phân việc); Agent là nơi thực thi build. Tách ra để bảo mật và mở rộng.</p>
+
+  <p class="q">Q: selfHeal và prune trong Argo CD?</p>
+  <p class="a-txt">selfHeal: tự sửa lại khi cluster bị chỉnh tay lệch Git. prune: xóa resource đã bị bỏ khỏi Git để cluster khớp đúng khai báo.</p>
+</section>
+
+<footer>
+  Jenkins &amp; Argo CD — Toàn tập · Tài liệu học DevSecOps · 07/2026<br>
+  CI (Jenkins) làm ra artifact · CD (Argo CD) đồng bộ trạng thái từ Git vào cluster.
+</footer>
+
+</div>
